@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XKCD Radiation Dose Explorer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    const ChevronRight = ({ size = 20 }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="9 18 15 12 9 6" />
+      </svg>
+    );
+
+    const ChevronLeft = ({ size = 16 }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="15 18 9 12 15 6" />
+      </svg>
+    );
+
+    const RotateCcw = ({ size = 16 }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="1 4 1 10 7 10" />
+        <path d="M3.51 15a9 9 0 1 0 .49-3.5" />
+      </svg>
+    );
+
+    const Activity = ({ size = 24 }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+      </svg>
+    );
+
+    function App() {
+      const [step, setStep] = useState(0);
+
+      const steps = [
+        {
+          title: "Introduction",
+          description: "This chart illustrates the ionizing radiation dose a person can absorb from various sources. The unit for absorbed dose is the \"sievert\" (Sv). We will explore the chart step-by-step. Click 'Next' to begin.",
+          status: "Top Text Revealed"
+        },
+        {
+          title: "The Blue Section",
+          description: "This section covers the smallest doses of radiation, measured in microsieverts (µSv). It includes everyday things like eating a banana, sleeping next to someone, and taking an airplane flight. Notice how tiny these amounts are compared to the sections below.",
+          status: "Blue Section Revealed"
+        },
+        {
+          title: "The Green Section",
+          description: "Moving up in scale, these are mostly occupational and medical doses. We are still largely looking at µSv, but in much larger quantities, leading up to millisieverts (mSv). It includes things like chest CT scans and yearly background radiation limits.",
+          status: "Green Section Revealed"
+        },
+        {
+          title: "The Yellow & Red Section",
+          description: "Here we see the largest doses, measured in sieverts (Sv) and large amounts of mSv. These represent severe exposures, emergency limits, and fatal doses. The visual scaling shows just how massive these doses are compared to everyday life.",
+          status: "Entire Chart Revealed"
+        }
+      ];
+
+      return (
+        <div className="flex flex-col md:flex-row h-screen w-full bg-slate-900 font-sans text-slate-800 overflow-hidden">
+
+          {/* Sidebar Panel */}
+          <div className="w-full md:w-80 lg:w-96 bg-white shadow-2xl z-20 flex flex-col md:h-full border-r border-slate-200 shrink-0">
+            <div className="p-6 flex-1 overflow-y-auto">
+
+              {/* Header */}
+              <div className="flex items-center gap-3 mb-8">
+                <div className="p-2 bg-blue-100 rounded-lg text-blue-600 shadow-sm">
+                  <Activity size={24} />
+                </div>
+                <h1 className="text-xl font-bold text-slate-900 leading-tight">Radiation Dose Explorer</h1>
+              </div>
+
+              {/* Progress Indicator */}
+              <div className="flex gap-1 mb-6">
+                {[0, 1, 2, 3].map((idx) => (
+                  <div
+                    key={idx}
+                    className={`h-1.5 flex-1 rounded-full transition-colors duration-500 ${
+                      idx <= step ? 'bg-blue-600' : 'bg-slate-200'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              {/* Content */}
+              <div className="mb-6">
+                <div className="inline-block px-2 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded mb-3 uppercase tracking-wider">
+                  {steps[step].status}
+                </div>
+                <h2 className="text-2xl font-bold mb-3 text-slate-900">{steps[step].title}</h2>
+                <p className="text-slate-600 leading-relaxed text-sm md:text-base">
+                  {steps[step].description}
+                </p>
+              </div>
+            </div>
+
+            {/* Controls */}
+            <div className="p-6 bg-slate-50 border-t border-slate-200 mt-auto">
+              <button
+                onClick={() => setStep(s => Math.min(s + 1, 3))}
+                disabled={step === 3}
+                className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-xl transition-all active:scale-[0.98] shadow-sm mb-3"
+              >
+                {step === 3 ? "Exploration Complete" : "Reveal Next Section"}
+                {step < 3 && <ChevronRight size={20} />}
+              </button>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setStep(s => Math.max(s - 1, 0))}
+                  disabled={step === 0}
+                  className="flex-1 flex items-center justify-center gap-1 bg-white border border-slate-300 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed text-slate-700 font-medium py-2.5 px-4 rounded-xl transition-colors"
+                >
+                  <ChevronLeft size={16} /> Previous
+                </button>
+                <button
+                  onClick={() => setStep(0)}
+                  disabled={step === 0}
+                  className="flex-1 flex items-center justify-center gap-1 bg-white border border-slate-300 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed text-slate-700 font-medium py-2.5 px-4 rounded-xl transition-colors"
+                >
+                  <RotateCcw size={16} /> Reset
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Image Viewer */}
+          <div className="flex-1 overflow-auto bg-slate-900 flex justify-center p-4 md:p-8 relative custom-scrollbar">
+            <div
+              className="relative shadow-2xl bg-white shrink-0 transition-all duration-500"
+              style={{ height: 'max-content' }}
+            >
+              {/* Main Image */}
+              <img
+                src="https://imgs.xkcd.com/blag/radiation.png"
+                alt="Radiation Dose Chart"
+                className="max-w-[1000px] w-full h-auto block"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Radiation_Dose_Chart_by_Xkcd.png';
+                }}
+              />
+
+              {/* Overlay 1: Covers Blue Section */}
+              <div
+                className="absolute left-0 w-[34.5%] h-[50%] pointer-events-none z-10"
+                style={{
+                  top: '7.5%',
+                  background: 'rgba(0,0,0,0.5)',
+                  backdropFilter: 'blur(6px)',
+                  transition: 'opacity 1s ease-in-out',
+                  opacity: step >= 1 ? 0 : 1
+                }}
+              />
+
+              {/* Overlay 2: Covers Green Section */}
+              <div
+                className="absolute w-[65.5%] h-[50%] pointer-events-none z-10"
+                style={{
+                  top: '7.5%',
+                  left: '34.5%',
+                  background: 'rgba(0,0,0,0.5)',
+                  backdropFilter: 'blur(6px)',
+                  transition: 'opacity 1s ease-in-out',
+                  opacity: step >= 2 ? 0 : 1
+                }}
+              />
+
+              {/* Overlay 3: Covers Bottom (Yellow/Orange/Red) Section */}
+              <div
+                className="absolute left-0 w-full h-[42.5%] pointer-events-none z-10"
+                style={{
+                  top: '57.5%',
+                  background: 'rgba(0,0,0,0.5)',
+                  backdropFilter: 'blur(6px)',
+                  transition: 'opacity 1s ease-in-out',
+                  opacity: step >= 3 ? 0 : 1
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
